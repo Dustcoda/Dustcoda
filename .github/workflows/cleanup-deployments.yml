@@ -1,0 +1,23 @@
+name: Cleanup Old Deployments
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+    steps:
+      - name: Delete old deployments
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          repo="${{ github.repository }}"
+          mapfile -t ids < <(gh api "repos/$repo/deployments?per_page=100" --paginate -q '.[].id')
+          for id in "${ids[@]:1}"; do
+            gh api --method POST "repos/$repo/deployments/$id/statuses" -f state=inactive --silent || true
+            gh api --method DELETE "repos/$repo/deployments/$id" --silent || true
+          done
