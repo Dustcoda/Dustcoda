@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "sharp": "^0.34.5",
+    "svg-captcha": "^1.4.0"
+  }
+}
